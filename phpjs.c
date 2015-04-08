@@ -133,10 +133,6 @@ void duk_to_zval(zval ** var, duk_context * ctx, duk_idx_t idx)
         str = duk_get_lstring(ctx, idx, &len);
         ZVAL_STRINGL(*var, str, len,  1);
         break;
-
-    default:
-        php_printf("failed to get data (type=%d => %s)\n", duk_get_type(ctx, idx),  duk_safe_to_string(ctx, -1));
-        break;
     }
 }
 

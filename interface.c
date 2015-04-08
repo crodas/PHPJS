@@ -24,7 +24,7 @@ ZEND_METHOD(JS, evaluate)
         return;
 
     if (duk_peval_lstring(ctx, str, len) != 0) {
-        printf("Error: %s\n", duk_safe_to_string(ctx, -1));
+        php_printf("Error: %s\n", duk_safe_to_string(ctx, -1));
         RETURN_FALSE;
     }
 
@@ -44,7 +44,7 @@ ZEND_METHOD(JS, load)
     }
 
     if (duk_peval_file(ctx, varname) != 0) {
-        printf("Error: %s\n", duk_safe_to_string(ctx, -1));
+        php_printf("Error: %s\n", duk_safe_to_string(ctx, -1));
         RETURN_FALSE;
     }
 
@@ -163,13 +163,26 @@ ZEND_METHOD(JS, __call)
         return;
     }
 
-    //duk_push_string(obj->ctx, "");
-    if (duk_pcall(obj->ctx, 0 /*nargs*/) != 0) {
-        printf("Error: %s\n", duk_safe_to_string(obj->ctx, -1));
+    int argc = 0;
+    
+    zval ** data;
+    HashTable *myht = Z_ARRVAL_P(a_args);
+    
+    for (zend_hash_internal_pointer_reset(myht);
+            zend_hash_get_current_data(myht, (void **) &data) == SUCCESS;
+            zend_hash_move_forward(myht)
+        ) {
+        zval_to_duk(ctx, NULL, *data);
+        argc++;
     }
-    duk_pop(obj->ctx);
 
-    RETURN_FALSE;
+
+    if (duk_pcall(obj->ctx, argc) != 0) {
+        php_printf("Error: %s\n", duk_safe_to_string(obj->ctx, -1));
+        RETURN_FALSE;
+    }
+    duk_to_zval(&return_value, ctx, -1);
+    duk_pop(obj->ctx);
 }
 
 ZEND_BEGIN_ARG_INFO_EX(ai_phpjs_JS_evaluate, 0, 0, 1)
