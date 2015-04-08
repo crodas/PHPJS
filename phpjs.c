@@ -179,6 +179,7 @@ duk_ret_t duk_set_into_php(duk_context * ctx)
 
     name = estrdup(duk_get_string(ctx, 1) + 1);
 
+    TSRMLS_FETCH();
     zend_hash_add(EG(active_symbol_table), name, strlen(name)+1, &value, sizeof(zval*), NULL);
 
     duk_push_true(ctx);
@@ -194,6 +195,7 @@ duk_ret_t duk_get_from_php(duk_context * ctx)
 
     if (name[0] == '$') {
         zval ** value;
+        TSRMLS_FETCH();
         if(zend_hash_find(EG(active_symbol_table), name+1, strlen(name), (void **) &value) == SUCCESS) {
             zval_to_duk(ctx, NULL, *value);
         } else {
