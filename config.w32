@@ -1,0 +1,13 @@
+// $Id$
+// vim:ft=javascript
+
+// If your extension references something external, use ARG_WITH
+// ARG_WITH("php-js", "for php-js support", "no");
+
+// Otherwise, use ARG_ENABLE
+// ARG_ENABLE("php-js", "enable php-js support", "no");
+
+if (PHP_PHP-JS != "no") {
+	EXTENSION("php-js", "phpjs.c duktape.c interface.c");
+}
+
