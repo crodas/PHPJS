@@ -23,12 +23,16 @@ extern zend_module_entry phpjs_module_entry;
 BEGIN_EXTERN_C()
 
 extern PHPAPI zend_class_entry *phpjs_JS_ptr;
+extern PHPAPI zend_class_entry *phpjs_JSException_ptr;
+extern PHPAPI zend_class_entry *phpjs_JSFunctionWrapper_ptr;
+extern PHPAPI zend_class_entry *phpjs_JS_ptr;
 extern void duk_to_zval(zval ** var, duk_context * ctx, duk_idx_t idx);
 extern void zval_to_duk(duk_context * ctx, char * name, zval * value);
 extern duk_idx_t duk_push_php_array_or_object(duk_context * ctx, HashTable * myht);
 extern duk_ret_t php_get_function_wrapper(duk_context * ctx);
 extern duk_ret_t duk_set_into_php(duk_context * ctx);
 extern duk_ret_t duk_get_from_php(duk_context * ctx);
+extern void php_register_function_handler();
 
 
 END_EXTERN_C()

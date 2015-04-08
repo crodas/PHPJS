@@ -1,5 +1,16 @@
 <?php
 
+final class JSException extends Exception
+{
+}
+
+final class JSFunctionWrapper
+{
+    public function __invoke()
+    {
+    }
+}
+
 class JS implements ArrayAccess
 {
     public function load($file)

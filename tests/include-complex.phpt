@@ -10,5 +10,5 @@ var_dump($js->u("(function() {
     return someVariable;
 })"));
 --EXPECTF--
-string(32) "(function(){var %s=99;return %s});"
+string(32) "(function(){var %c=99;return %c});"
 

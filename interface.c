@@ -5,6 +5,7 @@
 #include "duktape.h"
 #include "phpjs.h"
 
+PHPAPI zend_class_entry *phpjs_JSException_ptr;
 PHPAPI zend_class_entry *phpjs_JS_ptr;
 
 typedef struct {
@@ -24,7 +25,7 @@ ZEND_METHOD(JS, evaluate)
         return;
 
     if (duk_peval_lstring(ctx, str, len) != 0) {
-        php_printf("Error: %s\n", duk_safe_to_string(ctx, -1));
+        duk_php_throw(ctx, -1);
         RETURN_FALSE;
     }
 
@@ -44,7 +45,7 @@ ZEND_METHOD(JS, load)
     }
 
     if (duk_peval_file(ctx, varname) != 0) {
-        php_printf("Error: %s\n", duk_safe_to_string(ctx, -1));
+        duk_php_throw(ctx, -1);
         RETURN_FALSE;
     }
 
@@ -178,7 +179,7 @@ ZEND_METHOD(JS, __call)
 
 
     if (duk_pcall(obj->ctx, argc) != 0) {
-        php_printf("Error: %s\n", duk_safe_to_string(obj->ctx, -1));
+        duk_php_throw(ctx, -1);
         RETURN_FALSE;
     }
     duk_to_zval(&return_value, ctx, -1);
@@ -319,10 +320,15 @@ PHP_MINIT_FUNCTION(phpjs)
     zend_class_entry _ce, *_if;
     zval* _val;
 
+    INIT_CLASS_ENTRY(_ce, "JSException", NULL);
+    phpjs_JSException_ptr = zend_register_internal_class_ex(&_ce, zend_exception_get_default(TSRMLS_C), NULL TSRMLS_CC);
+
     INIT_CLASS_ENTRY(_ce, "JS", phpjs_JS_functions);
     phpjs_JS_ptr = zend_register_internal_class(&_ce TSRMLS_CC);
     phpjs_JS_ptr->create_object = phpjs_new_vm;
     zend_do_implement_interface(phpjs_JS_ptr, zend_ce_arrayaccess TSRMLS_CC);
+
+    php_register_function_handler();
 
     return SUCCESS;
 }

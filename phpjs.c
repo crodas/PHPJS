@@ -5,6 +5,24 @@
 #include "duktape.h"
 #include "phpjs.h"
 
+void duk_php_throw(duk_context * ctx, duk_idx_t idx)
+{
+    zval * tc_ex;
+    MAKE_STD_ZVAL(tc_ex);
+    object_init_ex(tc_ex, phpjs_JSException_ptr);
+
+    char * message = duk_safe_to_string(ctx, idx);
+
+    zend_update_property_string(
+        phpjs_JSException_ptr,
+        tc_ex,
+        "message", 
+        sizeof("message") - 1,
+        message TSRMLS_CC
+    );
+    zend_throw_exception_object(tc_ex TSRMLS_CC);
+}
+
 void zval_to_duk(duk_context * ctx, char * name, zval * value)
 {
     switch (Z_TYPE_P(value)) {

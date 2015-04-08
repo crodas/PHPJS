@@ -4,7 +4,11 @@ Check for extension presence
 <?php if (!extension_loaded("phpjs")) print "skip"; ?>
 --FILE--
 <?php 
-echo "phpjs extension is available";
+var_dump(class_exists('JS'));
+var_dump(class_exists('JSFunctionWrapper'));
+var_dump(class_exists('JSException'));
 ?>
 --EXPECT--
-phpjs extension is available
+bool(true)
+bool(true)
+bool(true)
