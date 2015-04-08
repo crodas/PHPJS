@@ -5,7 +5,7 @@
 #include "duktape.h"
 #include "phpjs.h"
 
-void duk_php_throw(duk_context * ctx, duk_idx_t idx)
+void duk_php_throw(duk_context * ctx, duk_idx_t idx TSRMLS_DC)
 {
     zval * tc_ex;
     MAKE_STD_ZVAL(tc_ex);

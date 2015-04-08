@@ -25,7 +25,7 @@ ZEND_METHOD(JS, evaluate)
         return;
 
     if (duk_peval_lstring(ctx, str, len) != 0) {
-        duk_php_throw(ctx, -1);
+        duk_php_throw(ctx, -1 TSRMLS_CC);
         RETURN_FALSE;
     }
 
@@ -45,7 +45,7 @@ ZEND_METHOD(JS, load)
     }
 
     if (duk_peval_file(ctx, varname) != 0) {
-        duk_php_throw(ctx, -1);
+        duk_php_throw(ctx, -1 TSRMLS_CC);
         RETURN_FALSE;
     }
 
@@ -179,7 +179,7 @@ ZEND_METHOD(JS, __call)
 
 
     if (duk_pcall(obj->ctx, argc) != 0) {
-        duk_php_throw(ctx, -1);
+        duk_php_throw(ctx, -1 TSRMLS_CC);
         RETURN_FALSE;
     }
     duk_to_zval(&return_value, ctx, -1);
