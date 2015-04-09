@@ -7,19 +7,21 @@
 
 void duk_php_throw(duk_context * ctx, duk_idx_t idx TSRMLS_DC)
 {
+    char * js_stack, * message;
     zval * tc_ex;
     MAKE_STD_ZVAL(tc_ex);
     object_init_ex(tc_ex, phpjs_JSException_ptr);
 
-    char * message = duk_safe_to_string(ctx, idx);
 
-    zend_update_property_string(
-        phpjs_JSException_ptr,
-        tc_ex,
-        "message", 
-        sizeof("message") - 1,
-        message TSRMLS_CC
-    );
+    duk_get_prop_string(ctx, idx, "stack");
+    js_stack = duk_safe_to_string(ctx, -1);
+    duk_pop(ctx); 
+
+    message = duk_safe_to_string(ctx, idx);
+
+    SET_PROP(tc_ex, phpjs_JSException_ptr, "message", message);
+    SET_PROP(tc_ex, phpjs_JSException_ptr, "js_stack", js_stack);
+
     zend_throw_exception_object(tc_ex TSRMLS_CC);
 }
 
@@ -93,7 +95,7 @@ duk_idx_t duk_push_php_array_or_object(duk_context * ctx, HashTable * myht)
         ) {
         switch (zend_hash_get_current_key_ex(myht, &str_index, &str_length, &num_index, 0, NULL)) {
         case HASH_KEY_IS_STRING:
-                return duk_push_object(ctx);
+            return duk_push_object(ctx);
         }
     }
 

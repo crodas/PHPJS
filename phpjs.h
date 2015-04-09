@@ -47,4 +47,6 @@ if (!this_ptr || !instanceof_function(Z_OBJCE_P(this_ptr), phpjs_JS_ptr TSRMLS_C
 } \
 duk_context * ctx = obj->ctx;
 
+#define SET_PROP(var, t, n, v)  zend_update_property_string(t, var, n, strlen(n), v TSRMLS_CC);
+
 #endif
