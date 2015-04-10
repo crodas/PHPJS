@@ -33,6 +33,7 @@ extern duk_ret_t php_get_function_wrapper(duk_context * ctx);
 extern duk_ret_t duk_set_into_php(duk_context * ctx);
 extern duk_ret_t duk_get_from_php(duk_context * ctx);
 extern void php_register_function_handler();
+extern void phpjs_JSFunctionWrapper_setContext(zval * this, duk_context * ctx, duk_idx_t idx);
 
 
 END_EXTERN_C()
@@ -49,7 +50,7 @@ if (!this_ptr || !instanceof_function(Z_OBJCE_P(this_ptr), phpjs_JS_ptr TSRMLS_C
 } \
 duk_context * ctx = obj->ctx;
 
-#define SET_PROP(var, t, n, v)  zend_update_property_string(t, var, n, strlen(n), v TSRMLS_CC);
+#define SET_PROP(var, t, n, v)  zend_update_property_string(t, var, n, sizeof(n)-1, v TSRMLS_CC);
 
 #define THROW_EXCEPTION(message) do { \
     zval * tc_ex; \

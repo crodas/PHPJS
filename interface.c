@@ -251,17 +251,12 @@ static zend_function_entry phpjs_functions[] = {
 };
 
 
-static void php_js_destroy(php_js_t *obj TSRMLS_DC)
-{
-    if (obj->ctx) {
-        duk_destroy_heap(obj->ctx);
-    }
-}
-
 static void php_js_free_storage(php_js_t *obj TSRMLS_DC)
 {
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
-    php_js_destroy(obj TSRMLS_CC);
+    if (obj->ctx) {
+        duk_destroy_heap(obj->ctx);
+    }
     efree(obj);
 }
 
@@ -282,7 +277,7 @@ zend_object_value phpjs_new_vm(zend_class_entry *ce TSRMLS_DC)
 #endif
 
 
-    obj->ctx = duk_create_heap_default();
+    obj->ctx = duk_create_heap(NULL, NULL, NULL, tmp, NULL);
 
     duk_push_global_object(obj->ctx);
     duk_push_c_function(obj->ctx, duk_php_print, DUK_VARARGS);

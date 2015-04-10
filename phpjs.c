@@ -14,15 +14,19 @@ void duk_php_throw(duk_context * ctx, duk_idx_t idx TSRMLS_DC)
 
 
     duk_get_prop_string(ctx, idx, "stack");
-    js_stack = duk_safe_to_string(ctx, -1);
+    js_stack = estrdup(duk_safe_to_string(ctx, -1));
     duk_pop(ctx); 
 
-    message = duk_safe_to_string(ctx, idx);
+    message = estrdup(duk_safe_to_string(ctx, idx));
+    duk_pop(ctx); 
 
     SET_PROP(tc_ex, phpjs_JSException_ptr, "message", message);
     SET_PROP(tc_ex, phpjs_JSException_ptr, "js_stack", js_stack);
 
     zend_throw_exception_object(tc_ex TSRMLS_CC);
+
+    efree(js_stack);
+    efree(message);
 }
 
 void zval_to_duk(duk_context * ctx, char * name, zval * value)
@@ -115,6 +119,11 @@ void duk_to_zval(zval ** var, duk_context * ctx, duk_idx_t idx)
         break;
 
     case DUK_TYPE_OBJECT: {
+        if (duk_is_function(ctx, idx)) {
+            object_init_ex(*var, phpjs_JSFunctionWrapper_ptr);
+            phpjs_JSFunctionWrapper_setContext(*var, ctx, idx);
+            break;
+        }
         duk_idx_t idx1;
         duk_enum(ctx, idx, DUK_ENUM_OWN_PROPERTIES_ONLY);
         idx1 = duk_normalize_index(ctx, -1);
