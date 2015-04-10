@@ -31,8 +31,12 @@ static zend_object_value phpjs_function_new(zend_class_entry * ce TSRMLS_DC)
     obj = (phpjs_function *) emalloc(sizeof(phpjs_function));
     memset(obj, 0, sizeof(phpjs_function));
     zend_object_std_init(&obj->zo, ce TSRMLS_CC);
-
+#if PHP_VERSION_ID < 50399
+    zval * tmp;
+    zend_hash_copy(obj->zo.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+#else
     object_properties_init((zend_object*) &(obj->zo), ce);
+#endif
 
     retval.handle = zend_objects_store_put(obj, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t)phpjs_function_free, NULL TSRMLS_CC);
     retval.handlers = zend_get_std_object_handlers();
