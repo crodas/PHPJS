@@ -120,6 +120,7 @@ void duk_to_zval(zval ** var, duk_context * ctx, duk_idx_t idx)
 
     case DUK_TYPE_OBJECT: {
         if (duk_is_function(ctx, idx)) {
+            TSRMLS_FETCH();
             object_init_ex(*var, phpjs_JSFunctionWrapper_ptr);
             phpjs_JSFunctionWrapper_setContext(*var, ctx, idx);
             break;
