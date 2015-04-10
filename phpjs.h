@@ -37,6 +37,9 @@ extern void php_register_function_handler();
 
 END_EXTERN_C()
 
+#define Z_EXCEPTION_PROP(x) Z_STRVAL_P(zend_read_property(zend_exception_get_default(TSRMLS_C), EG(exception), x, sizeof(x)-1, 0 TSRMLS_CC))
+
+
 #define FETCH_THIS \
     zval* object = getThis(); \
 php_js_t*  obj = NULL;      \

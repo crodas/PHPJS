@@ -160,6 +160,7 @@ duk_ret_t php_get_function_wrapper(duk_context * ctx)
 {
     char * fnc = "";
     zval *retval, *func;
+    int catch = 0;
     int args = duk_get_top(ctx); /* function args */
 
     MAKE_STD_ZVAL(func);
@@ -179,9 +180,17 @@ duk_ret_t php_get_function_wrapper(duk_context * ctx)
         duk_throw(ctx);
     }
 
+    if (EG(exception) != NULL) {
+        catch = 1;
+        /* There was an exception in the PHP side, let's catch it and throw as a JS exception */
+        duk_push_string(ctx, Z_EXCEPTION_PROP("message"));
+        zend_clear_exception(TSRMLS_C);
+    }
+
     zval_ptr_dtor(&func);
     zval_ptr_dtor(&retval);
 
+    if (catch) duk_throw(ctx);
     return 1;
 }
 
@@ -197,7 +206,6 @@ duk_ret_t duk_set_into_php(duk_context * ctx)
 
     TSRMLS_FETCH();
     zend_hash_add(EG(active_symbol_table), name, strlen(name)+1, &value, sizeof(zval*), NULL);
-
     duk_push_true(ctx);
 
     return 1;

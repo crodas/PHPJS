@@ -322,6 +322,7 @@ PHP_MINIT_FUNCTION(phpjs)
 
     INIT_CLASS_ENTRY(_ce, "JSException", NULL);
     phpjs_JSException_ptr = zend_register_internal_class_ex(&_ce, zend_exception_get_default(TSRMLS_C), NULL TSRMLS_CC);
+    zend_declare_property_string(phpjs_JSException_ptr, _S("js_stack"), "", ZEND_ACC_PROTECTED TSRMLS_CC);
 
     INIT_CLASS_ENTRY(_ce, "JS", phpjs_JS_functions);
     phpjs_JS_ptr = zend_register_internal_class(&_ce TSRMLS_CC);
