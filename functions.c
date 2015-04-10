@@ -46,6 +46,7 @@ static zend_object_value phpjs_function_new(zend_class_entry * ce TSRMLS_DC)
 
 void phpjs_JSFunctionWrapper_setContext(zval * this, duk_context * ctx, duk_idx_t idx)
 {
+    TSRMLS_FETCH();
     phpjs_function * obj = (phpjs_function *) zend_object_store_get_object(this TSRMLS_CC );   
     duk_memory_functions mem;
     duk_get_memory_functions(ctx, &mem);
