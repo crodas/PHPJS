@@ -39,7 +39,6 @@ END_EXTERN_C()
 
 #define Z_EXCEPTION_PROP(x) Z_STRVAL_P(zend_read_property(zend_exception_get_default(TSRMLS_C), EG(exception), x, sizeof(x)-1, 0 TSRMLS_CC))
 
-
 #define FETCH_THIS \
     zval* object = getThis(); \
 php_js_t*  obj = NULL;      \
@@ -51,5 +50,14 @@ if (!this_ptr || !instanceof_function(Z_OBJCE_P(this_ptr), phpjs_JS_ptr TSRMLS_C
 duk_context * ctx = obj->ctx;
 
 #define SET_PROP(var, t, n, v)  zend_update_property_string(t, var, n, strlen(n), v TSRMLS_CC);
+
+#define THROW_EXCEPTION(message) do { \
+    zval * tc_ex; \
+    MAKE_STD_ZVAL(tc_ex); \
+    object_init_ex(tc_ex, phpjs_JSException_ptr); \
+    SET_PROP(tc_ex, phpjs_JSException_ptr, "message", message); \
+    zend_throw_exception_object(tc_ex TSRMLS_CC); \
+} while (0); \
+
 
 #endif

@@ -160,8 +160,11 @@ ZEND_METHOD(JS, __call)
 
     if (!duk_is_function(obj->ctx, -1)) {
         duk_pop(obj->ctx);
-        zend_error(E_ERROR, "%s() doesnt exists", fnc);
-        return;
+        char * exception = emalloc(1024 + strlen(fnc));
+        sprintf(exception, "%s() is not a javascript function", fnc);
+        THROW_EXCEPTION(exception);
+        efree(exception);
+        RETURN_FALSE;
     }
 
     int argc = 0;
