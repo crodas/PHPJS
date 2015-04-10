@@ -5,6 +5,52 @@
 #include "duktape.h"
 #include "phpjs.h"
 
+duk_ret_t duk_php_print(duk_context * ctx)
+{
+    int args = duk_get_top(ctx);
+    int i;
+
+    for (i = 0; i < args; i++) {
+        php_printf(i == args - 1 ? "%s\n" : "%s ", duk_safe_to_string( ctx, i ));
+    }
+
+    duk_push_true(ctx);
+
+    return 1;
+}
+
+
+void duk_php_init(duk_context * ctx)
+{
+    duk_push_global_object(ctx);
+    duk_push_c_function(ctx, duk_php_print, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "print");
+    duk_pop(ctx);
+
+    duk_push_global_object(ctx);
+    duk_push_c_function(ctx, duk_set_into_php, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "__set_into_php");
+    duk_pop(ctx);
+
+    duk_push_global_object(ctx);
+    duk_push_c_function(ctx, duk_get_from_php, DUK_VARARGS);
+    duk_put_prop_string(ctx, -2, "__get_from_php");
+    duk_pop(ctx);
+
+    duk_push_string(ctx, "var $PHP = new Proxy({}, {       " \
+        "set: __set_into_php,                                   " \
+        "get: __get_from_php,                                   " \
+        "});                                                    " \
+        "var PHP = $PHP;                                        " 
+    );
+
+    if (duk_peval(ctx) != 0) {
+        printf("eval failed: %s\n", duk_safe_to_string(ctx, -1));
+    }
+    duk_pop(ctx);
+
+}
+
 void duk_php_throw(duk_context * ctx, duk_idx_t idx TSRMLS_DC)
 {
     char * js_stack, * message;

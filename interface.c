@@ -34,6 +34,13 @@ ZEND_METHOD(JS, evaluate)
 }
 
 // public function load($path)
+ZEND_METHOD(JS, __construct)
+{
+    FETCH_THIS_EX(0);
+    obj->ctx = duk_create_heap(NULL, NULL, NULL, getThis(), NULL);
+    duk_php_init(obj->ctx);
+}
+
 ZEND_METHOD(JS, load)
 {
     FETCH_THIS;
@@ -99,20 +106,6 @@ ZEND_METHOD(JS, __get)
     duk_push_global_object(ctx);
     duk_get_prop_string(ctx, -1, varname);
     duk_to_zval(&return_value, ctx, -1);
-}
-
-duk_ret_t duk_php_print(duk_context * ctx)
-{
-    int args = duk_get_top(ctx);
-    int i;
-
-    for (i = 0; i < args; i++) {
-        php_printf(i == args - 1 ? "%s\n" : "%s ", duk_safe_to_string( ctx, i ));
-    }
-
-    duk_push_true(ctx);
-
-    return 1;
 }
 
 // public function __set($name, $value)
@@ -234,15 +227,16 @@ ZEND_BEGIN_ARG_INFO_EX(ai_phpjs_JS___call, 0, 0, 2)
 ZEND_END_ARG_INFO()
 
     static zend_function_entry phpjs_JS_functions[] = {
+        ZEND_ME(JS, __construct, NULL, ZEND_ACC_PUBLIC | ZEND_ACC_FINAL)
         ZEND_ME(JS, evaluate, ai_phpjs_JS_evaluate, ZEND_ACC_PUBLIC)
-            ZEND_ME(JS, load, ai_phpjs_JS_load, ZEND_ACC_PUBLIC)
-            ZEND_ME(JS, offsetExists, ai_phpjs_JS_offsetExists, ZEND_ACC_PUBLIC)
-            ZEND_ME(JS, offsetGet, ai_phpjs_JS_offsetGet, ZEND_ACC_PUBLIC)
-            ZEND_ME(JS, offsetSet, ai_phpjs_JS_offsetSet, ZEND_ACC_PUBLIC)
-            ZEND_ME(JS, offsetUnset, ai_phpjs_JS_offsetUnset, ZEND_ACC_PUBLIC)
-            ZEND_ME(JS, __get, ai_phpjs_JS___get, ZEND_ACC_PUBLIC)
-            ZEND_ME(JS, __set, ai_phpjs_JS___set, ZEND_ACC_PUBLIC)
-            ZEND_ME(JS, __call, ai_phpjs_JS___call, ZEND_ACC_PUBLIC)
+        ZEND_ME(JS, load, ai_phpjs_JS_load, ZEND_ACC_PUBLIC)
+        ZEND_ME(JS, offsetExists, ai_phpjs_JS_offsetExists, ZEND_ACC_PUBLIC)
+        ZEND_ME(JS, offsetGet, ai_phpjs_JS_offsetGet, ZEND_ACC_PUBLIC)
+        ZEND_ME(JS, offsetSet, ai_phpjs_JS_offsetSet, ZEND_ACC_PUBLIC)
+        ZEND_ME(JS, offsetUnset, ai_phpjs_JS_offsetUnset, ZEND_ACC_PUBLIC)
+        ZEND_ME(JS, __get, ai_phpjs_JS___get, ZEND_ACC_PUBLIC)
+        ZEND_ME(JS, __set, ai_phpjs_JS___set, ZEND_ACC_PUBLIC)
+        ZEND_ME(JS, __call, ai_phpjs_JS___call, ZEND_ACC_PUBLIC)
         ZEND_FE_END
     };
 
@@ -265,46 +259,12 @@ zend_object_value phpjs_new_vm(zend_class_entry *ce TSRMLS_DC)
 {
     zend_object_value retval;
     php_js_t * obj;
-    zval *tmp;
 
     obj = (php_js_t *) emalloc(sizeof(php_js_t));
     memset(obj, 0, sizeof(php_js_t));
     zend_object_std_init(&obj->zo, ce TSRMLS_CC);
-#if PHP_VERSION_ID < 50399
-    zend_hash_copy(obj->zo.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
-#else
     object_properties_init((zend_object*) &(obj->zo), ce);
-#endif
 
-
-    obj->ctx = duk_create_heap(NULL, NULL, NULL, tmp, NULL);
-
-    duk_push_global_object(obj->ctx);
-    duk_push_c_function(obj->ctx, duk_php_print, DUK_VARARGS);
-    duk_put_prop_string(obj->ctx, -2, "print");
-    duk_pop(obj->ctx);
-
-    duk_push_global_object(obj->ctx);
-    duk_push_c_function(obj->ctx, duk_set_into_php, DUK_VARARGS);
-    duk_put_prop_string(obj->ctx, -2, "__set_into_php");
-    duk_pop(obj->ctx);
-
-    duk_push_global_object(obj->ctx);
-    duk_push_c_function(obj->ctx, duk_get_from_php, DUK_VARARGS);
-    duk_put_prop_string(obj->ctx, -2, "__get_from_php");
-    duk_pop(obj->ctx);
-
-    duk_push_string(obj->ctx, "var $PHP = new Proxy({}, {       " \
-        "set: __set_into_php,                                   " \
-        "get: __get_from_php,                                   " \
-        "});                                                    " \
-        "var PHP = $PHP;                                        " 
-    );
-
-    if (duk_peval(obj->ctx) != 0) {
-        printf("eval failed: %s\n", duk_safe_to_string(obj->ctx, -1));
-    }
-    duk_pop(obj->ctx);
 
     retval.handle = zend_objects_store_put(obj, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t)php_js_free_storage, NULL TSRMLS_CC);
     retval.handlers = zend_get_std_object_handlers();

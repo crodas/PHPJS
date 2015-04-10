@@ -18,7 +18,7 @@ static void phpjs_function_free(phpjs_function * obj TSRMLS_DC)
 {
     zend_object_std_dtor(&obj->zo TSRMLS_CC);
     if (obj->vm) {
-        zval_ptr_dtor(obj->vm);
+        zval_ptr_dtor(&obj->vm);
     }
     efree(obj);
 }
@@ -32,11 +32,7 @@ static zend_object_value phpjs_function_new(zend_class_entry * ce TSRMLS_DC)
     memset(obj, 0, sizeof(phpjs_function));
     zend_object_std_init(&obj->zo, ce TSRMLS_CC);
 
-#if PHP_VERSION_ID < 50399
-    zend_hash_copy(obj->zo.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
-#else
     object_properties_init((zend_object*) &(obj->zo), ce);
-#endif
 
     retval.handle = zend_objects_store_put(obj, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t)phpjs_function_free, NULL TSRMLS_CC);
     retval.handlers = zend_get_std_object_handlers();
@@ -53,7 +49,7 @@ void phpjs_JSFunctionWrapper_setContext(zval * this, duk_context * ctx, duk_idx_
     obj->vm  = mem.udata;
     obj->ctx = ctx;
     obj->function = duk_require_heapptr(ctx, idx);
-    Z_ADDREF(obj->vm);
+    Z_ADDREF_P(obj->vm);
 
 }
 

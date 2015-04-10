@@ -40,15 +40,17 @@ END_EXTERN_C()
 
 #define Z_EXCEPTION_PROP(x) Z_STRVAL_P(zend_read_property(zend_exception_get_default(TSRMLS_C), EG(exception), x, sizeof(x)-1, 0 TSRMLS_CC))
 
-#define FETCH_THIS \
+#define FETCH_THIS_EX(validate) \
     zval* object = getThis(); \
 php_js_t*  obj = NULL;      \
 obj = (php_js_t *) zend_object_store_get_object( object TSRMLS_CC );   \
-if (!this_ptr || !instanceof_function(Z_OBJCE_P(this_ptr), phpjs_JS_ptr TSRMLS_CC) || obj->ctx == NULL) {    \
+if (!this_ptr || (validate && (!instanceof_function(Z_OBJCE_P(this_ptr), phpjs_JS_ptr TSRMLS_CC) || obj->ctx == NULL))) {    \
     php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unexpected error. This method cannot be called statically");    \
     return;    \
 } \
 duk_context * ctx = obj->ctx;
+
+#define FETCH_THIS FETCH_THIS_EX(1)
 
 #define SET_PROP(var, t, n, v)  zend_update_property_string(t, var, n, sizeof(n)-1, v TSRMLS_CC);
 
