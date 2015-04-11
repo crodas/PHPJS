@@ -3,7 +3,7 @@
 #endif
 
 #include "duktape.h"
-#include "phpjs.h"
+#include "php_phpjs.h"
 
 PHPAPI zend_class_entry *phpjs_JSException_ptr;
 PHPAPI zend_class_entry *phpjs_JS_ptr;

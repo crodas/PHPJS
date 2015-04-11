@@ -3,7 +3,7 @@
 #endif
 
 #include "duktape.h"
-#include "phpjs.h"
+#include "php_phpjs.h"
 
 duk_ret_t duk_php_print(duk_context * ctx)
 {

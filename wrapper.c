@@ -3,7 +3,7 @@
 #endif
 
 #include "duktape.h"
-#include "phpjs.h"
+#include "php_phpjs.h"
 
 void phpjs_wrapped_free(phpjs_wrap_duk_t * obj TSRMLS_DC)
 {
