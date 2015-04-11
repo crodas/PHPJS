@@ -52,7 +52,7 @@ static zend_function_entry phpjs_JSObjectWrapper_functions[] = {
     ZEND_FE_END
 };
 
-void php_register_object_handler(TSRMLS_DC)
+void php_register_object_handler(TSRMLS_D)
 {
     zend_class_entry _ce;
     INIT_CLASS_ENTRY(_ce, "JSObjectWrapper", phpjs_JSObjectWrapper_functions);

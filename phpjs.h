@@ -41,8 +41,8 @@ extern duk_idx_t duk_push_php_array_or_object(duk_context * ctx, HashTable * myh
 extern duk_ret_t php_get_function_wrapper(duk_context * ctx);
 extern duk_ret_t duk_set_into_php(duk_context * ctx);
 extern duk_ret_t duk_get_from_php(duk_context * ctx);
-extern void php_register_function_handler(TSRMLS_DC);
-extern void php_register_object_handler(TSRMLS_DC);
+extern void php_register_function_handler(TSRMLS_D);
+extern void php_register_object_handler(TSRMLS_D);
 extern void phpjs_wrapped_free(phpjs_wrap_duk_t * obj TSRMLS_DC);
 extern void phpjs_add_duk_context(zval * this, duk_context * ctx, duk_idx_t idx TSRMLS_DC);
 extern int php_duk_should_free(duk_context * ctx, duk_idx_t idx);
