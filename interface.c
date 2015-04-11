@@ -298,7 +298,7 @@ PHP_MINIT_FUNCTION(phpjs)
     zend_do_implement_interface(phpjs_JS_ptr, zend_ce_arrayaccess TSRMLS_CC);
 
     php_register_object_handler(TSRMLS_C);
-    php_register_function_handler(TSRMLS_CC);
+    php_register_function_handler(TSRMLS_C);
 
     return SUCCESS;
 }
