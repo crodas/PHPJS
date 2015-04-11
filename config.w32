@@ -8,6 +8,6 @@
 // ARG_ENABLE("php-js", "enable php-js support", "no");
 
 if (PHP_PHP-JS != "no") {
-	EXTENSION("php-js", "phpjs.c duktape.c interface.c functions.c");
+	EXTENSION("php-js", "phpjs.c duktape.c interface.c functions.c objects.c wrapper.c");
 }
 

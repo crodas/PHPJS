@@ -75,7 +75,11 @@ ZEND_METHOD(JS, offsetExists)
 
     duk_push_global_object(ctx);
     duk_get_prop_string(ctx, -1, varname);
-    duk_to_zval(&return_value, ctx, -1);
+    if (duk_get_type_mask(ctx, -3) & DUK_TYPE_UNDEFINED) {
+        RETURN_FALSE;
+    } else {
+        RETURN_TRUE;
+    }
 }
 
 ZEND_METHOD(JS, offsetGet)
@@ -106,6 +110,7 @@ ZEND_METHOD(JS, __get)
     duk_push_global_object(ctx);
     duk_get_prop_string(ctx, -1, varname);
     duk_to_zval(&return_value, ctx, -1);
+    php_duk_free_return(ctx);
 }
 
 // public function __set($name, $value)
@@ -179,7 +184,7 @@ ZEND_METHOD(JS, __call)
         RETURN_FALSE;
     }
     duk_to_zval(&return_value, ctx, -1);
-    duk_pop(obj->ctx);
+    php_duk_free_return(ctx);
 }
 
 ZEND_BEGIN_ARG_INFO_EX(ai_phpjs_JS_evaluate, 0, 0, 1)
@@ -292,7 +297,8 @@ PHP_MINIT_FUNCTION(phpjs)
     phpjs_JS_ptr->create_object = phpjs_new_vm;
     zend_do_implement_interface(phpjs_JS_ptr, zend_ce_arrayaccess TSRMLS_CC);
 
-    php_register_function_handler();
+    php_register_object_handler(TSRMLS_CC);
+    php_register_function_handler(TSRMLS_CC);
 
     return SUCCESS;
 }

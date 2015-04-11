@@ -93,12 +93,12 @@ void zval_to_duk(duk_context * ctx, char * name, zval * value)
            ) {
             zval_to_duk(ctx, NULL, *data);
             switch (zend_hash_get_current_key_ex(myht, &str_index, &str_length, &num_index, 0, NULL)) {
-                case HASH_KEY_IS_LONG:
-                    duk_put_prop_index(ctx, arr_idx, num_index);
-                    break;
-                case HASH_KEY_IS_STRING:
-                    duk_put_prop_string(ctx, arr_idx, str_index);
-                    break;
+            case HASH_KEY_IS_LONG:
+                duk_put_prop_index(ctx, arr_idx, num_index);
+                break;
+            case HASH_KEY_IS_STRING:
+                duk_put_prop_string(ctx, arr_idx, str_index);
+                break;
             }
 
         }
@@ -152,6 +152,37 @@ duk_idx_t duk_push_php_array_or_object(duk_context * ctx, HashTable * myht)
     return duk_push_array(ctx);
 }
 
+static int duk_is_php_object(duk_context * ctx, duk_idx_t idx)
+{
+    if (duk_is_array(ctx, idx)) {
+        return 0;
+    }
+
+    int cmp;
+
+    duk_get_prop_string(ctx, idx, "constructor");
+    duk_get_prop_string(ctx, -1, "name");
+    cmp = strcmp("Object", duk_safe_to_string(ctx, -1));
+    duk_pop_2(ctx);
+
+    return cmp != 0;
+}
+
+int php_duk_should_free(duk_context * ctx, duk_idx_t idx)
+{
+    switch (duk_get_type(ctx, idx)) {
+    case DUK_TYPE_OBJECT:
+        if (duk_is_function(ctx, idx) || duk_is_php_object(ctx, idx)) {
+            // We should not release it
+            return 0;
+        }
+        break;
+    }
+
+    return 1; /* we should free it */
+}
+
+
 void duk_to_zval(zval ** var, duk_context * ctx, duk_idx_t idx)
 {
     duk_size_t len;
@@ -168,9 +199,16 @@ void duk_to_zval(zval ** var, duk_context * ctx, duk_idx_t idx)
         if (duk_is_function(ctx, idx)) {
             TSRMLS_FETCH();
             object_init_ex(*var, phpjs_JSFunctionWrapper_ptr);
-            phpjs_JSFunctionWrapper_setContext(*var, ctx, idx);
+            phpjs_add_duk_context(*var, ctx, idx TSRMLS_CC);
+            break;
+        } else if (duk_is_php_object(ctx, idx)) {
+            TSRMLS_FETCH();
+            object_init_ex(*var, phpjs_JSObjectWrapper_ptr);
+            phpjs_add_duk_context(*var, ctx, idx TSRMLS_CC);
             break;
         }
+
+        // It's a hash or an array (AKA a PHP array)
         duk_idx_t idx1;
         duk_enum(ctx, idx, DUK_ENUM_OWN_PROPERTIES_ONLY);
         idx1 = duk_normalize_index(ctx, -1);

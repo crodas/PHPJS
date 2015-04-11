@@ -20,10 +20,19 @@
 extern zend_module_entry phpjs_module_entry;
 #define phpext_phpjs_ptr &phpjs_module_entry
 
+typedef struct {
+    zend_object zo;
+    duk_context * ctx;
+    zval * vm;
+    void * function;
+} phpjs_wrap_duk_t;
+
+
 BEGIN_EXTERN_C()
 
 extern PHPAPI zend_class_entry *phpjs_JS_ptr;
 extern PHPAPI zend_class_entry *phpjs_JSException_ptr;
+extern PHPAPI zend_class_entry *phpjs_JSObjectWrapper_ptr;
 extern PHPAPI zend_class_entry *phpjs_JSFunctionWrapper_ptr;
 extern PHPAPI zend_class_entry *phpjs_JS_ptr;
 extern void duk_to_zval(zval ** var, duk_context * ctx, duk_idx_t idx);
@@ -32,13 +41,28 @@ extern duk_idx_t duk_push_php_array_or_object(duk_context * ctx, HashTable * myh
 extern duk_ret_t php_get_function_wrapper(duk_context * ctx);
 extern duk_ret_t duk_set_into_php(duk_context * ctx);
 extern duk_ret_t duk_get_from_php(duk_context * ctx);
-extern void php_register_function_handler();
-extern void phpjs_JSFunctionWrapper_setContext(zval * this, duk_context * ctx, duk_idx_t idx);
+extern void php_register_function_handler(TSRMLS_DC);
+extern void php_register_object_handler(TSRMLS_DC);
+extern void phpjs_wrapped_free(phpjs_wrap_duk_t * obj TSRMLS_DC);
+extern void phpjs_add_duk_context(zval * this, duk_context * ctx, duk_idx_t idx TSRMLS_DC);
+extern int php_duk_should_free(duk_context * ctx, duk_idx_t idx);
 
+#define php_duk_free_return(ctx) \
+    if (php_duk_should_free(ctx, -1)) { \
+        duk_pop(ctx); \
+    }
 
 END_EXTERN_C()
 
 #define Z_EXCEPTION_PROP(x) Z_STRVAL_P(zend_read_property(zend_exception_get_default(TSRMLS_C), EG(exception), x, sizeof(x)-1, 0 TSRMLS_CC))
+
+#define FETCH_THIS_WRAPPER \
+    phpjs_wrap_duk_t * obj = (phpjs_wrap_duk_t *) zend_object_store_get_object(getThis() TSRMLS_CC );   \
+    if (!this_ptr || obj->ctx == NULL) {    \
+        php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unexpected error. This method cannot be called statically"); \
+        return; \
+    }   \
+    duk_context * ctx = obj->ctx;
 
 #define FETCH_THIS_EX(validate) \
     zval* object = getThis(); \
