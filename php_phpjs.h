@@ -24,7 +24,7 @@ typedef struct {
     zend_object zo;
     duk_context * ctx;
     zval * vm;
-    void * function;
+    duk_idx_t idx;
 } phpjs_wrap_duk_t;
 
 

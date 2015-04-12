@@ -21,6 +21,6 @@ void phpjs_add_duk_context(zval * this, duk_context * ctx, duk_idx_t idx TSRMLS_
     duk_get_memory_functions(ctx, &mem);
     obj->vm  = mem.udata;
     obj->ctx = ctx;
-    obj->function = duk_require_heapptr(ctx, idx);
+    obj->idx = duk_require_normalize_index(ctx, idx);
     Z_ADDREF_P(obj->vm);
 }

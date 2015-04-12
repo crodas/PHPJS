@@ -33,14 +33,14 @@ ZEND_METHOD(JSFunctionWrapper, __invoke)
     int argc = 0;
     FETCH_THIS_WRAPPER
 
-    duk_push_heapptr(ctx, obj->function);
-
+    duk_dup(ctx, obj->idx);
     if (duk_pcall(ctx, argc) != 0) {
         duk_php_throw(ctx, -1 TSRMLS_CC);
         RETURN_FALSE;
     }
     duk_to_zval(&return_value, obj->ctx, -1);
     php_duk_free_return(ctx);
+
 }
 
 ZEND_BEGIN_ARG_INFO_EX(ai_phpjs_JSFunctionWrapper___invoke, 0, 0, 0)

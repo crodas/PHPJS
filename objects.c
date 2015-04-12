@@ -37,7 +37,7 @@ ZEND_METHOD(JSObjectWrapper, __get)
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &varname, &varname_len) == FAILURE)
         return;
 
-    duk_push_heapptr(ctx, obj->function);
+    duk_dup(ctx, obj->idx);
     duk_get_prop_string(ctx, -1, varname);
     duk_to_zval(&return_value, ctx, -1);
     php_duk_free_return(ctx);
