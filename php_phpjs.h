@@ -46,7 +46,7 @@ extern void php_register_object_handler(TSRMLS_D);
 extern void phpjs_wrapped_free(phpjs_wrap_duk_t * obj TSRMLS_DC);
 extern void phpjs_add_duk_context(zval * this, duk_context * ctx, duk_idx_t idx TSRMLS_DC);
 extern int zval_array_to_stack(duk_context * ctx, zval * a_args);
-extern int phpjs_php__call(duk_context * ctx, char * function, zval * a_args, zval * return_value);
+extern int phpjs_php__call(duk_context * ctx, char * fnc, zval * a_args, zval * return_value TSRMLS_DC);
 
 #define php_duk_free_return(ctx) duk_pop(ctx); 
 
