@@ -154,7 +154,7 @@ ZEND_METHOD(JS, __call)
         return;
 
     duk_push_global_object(ctx);
-    phpjs_php__call(ctx, fnc, a_args, return_value); 
+    phpjs_php__call(ctx, fnc, a_args, return_value TSRMLS_CC); 
 }
 
 ZEND_BEGIN_ARG_INFO_EX(ai_phpjs_JS_evaluate, 0, 0, 1)

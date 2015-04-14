@@ -5,7 +5,7 @@
 #include "duktape.h"
 #include "php_phpjs.h"
 
-int phpjs_php__call(duk_context * ctx, char * fnc, zval * a_args, zval * return_value)
+int phpjs_php__call(duk_context * ctx, char * fnc, zval * a_args, zval * return_value TSRMLS_DC)
 {
     duk_get_prop_string(ctx, -1, fnc);
 

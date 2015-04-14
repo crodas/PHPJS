@@ -40,7 +40,7 @@ ZEND_METHOD(JSObjectWrapper, __call)
         return;
 
     duk_dup(ctx, obj->idx);
-    phpjs_php__call(ctx, fnc, a_args, return_value); 
+    phpjs_php__call(ctx, fnc, a_args, return_value TSRMLS_CC); 
     duk_pop(ctx);
 }
 
