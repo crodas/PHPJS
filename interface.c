@@ -153,38 +153,8 @@ ZEND_METHOD(JS, __call)
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz", &fnc, &lfnc, &a_args) == FAILURE)
         return;
 
-    duk_push_global_object(obj->ctx);
-    duk_get_prop_string(obj->ctx, -1, fnc);
-
-    if (!duk_is_function(obj->ctx, -1)) {
-        duk_pop(obj->ctx);
-        char * exception = emalloc(1024 + strlen(fnc));
-        sprintf(exception, "%s() is not a javascript function", fnc);
-        THROW_EXCEPTION(exception);
-        efree(exception);
-        RETURN_FALSE;
-    }
-
-    int argc = 0;
-    
-    zval ** data;
-    HashTable *myht = Z_ARRVAL_P(a_args);
-    
-    for (zend_hash_internal_pointer_reset(myht);
-            zend_hash_get_current_data(myht, (void **) &data) == SUCCESS;
-            zend_hash_move_forward(myht)
-        ) {
-        zval_to_duk(ctx, NULL, *data);
-        argc++;
-    }
-
-
-    if (duk_pcall(obj->ctx, argc) != 0) {
-        duk_php_throw(ctx, -1 TSRMLS_CC);
-        RETURN_FALSE;
-    }
-    duk_to_zval(&return_value, ctx, -1);
-    php_duk_free_return(ctx);
+    duk_push_global_object(ctx);
+    phpjs_php__call(ctx, fnc, a_args, return_value); 
 }
 
 ZEND_BEGIN_ARG_INFO_EX(ai_phpjs_JS_evaluate, 0, 0, 1)

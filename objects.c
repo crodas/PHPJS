@@ -28,6 +28,22 @@ static zend_object_value phpjs_function_new(zend_class_entry * ce TSRMLS_DC)
     return retval;
 }
 
+ZEND_METHOD(JSObjectWrapper, __call)
+{
+    FETCH_THIS_WRAPPER
+    zval* a_args;
+    char * fnc;
+    int lfnc;
+    int ind;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz", &fnc, &lfnc, &a_args) == FAILURE)
+        return;
+
+    duk_dup(ctx, obj->idx);
+    phpjs_php__call(ctx, fnc, a_args, return_value); 
+    duk_pop(ctx);
+}
+
 ZEND_METHOD(JSObjectWrapper, __get)
 {
     FETCH_THIS_WRAPPER
@@ -47,8 +63,14 @@ ZEND_BEGIN_ARG_INFO_EX(ai_phpjs_JS___get, 0, 0, 1)
     ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(ai_phpjs_JS___call, 0, 0, 2)
+    ZEND_ARG_INFO(0, name)
+    ZEND_ARG_INFO(0, args)
+ZEND_END_ARG_INFO()
+
 static zend_function_entry phpjs_JSObjectWrapper_functions[] = {
     ZEND_ME(JSObjectWrapper, __get, ai_phpjs_JS___get, ZEND_ACC_PUBLIC)
+    ZEND_ME(JSObjectWrapper, __call, ai_phpjs_JS___call, ZEND_ACC_PUBLIC)
     ZEND_FE_END
 };
 

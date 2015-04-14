@@ -168,21 +168,6 @@ static int duk_is_php_object(duk_context * ctx, duk_idx_t idx)
     return cmp != 0;
 }
 
-int php_duk_should_free(duk_context * ctx, duk_idx_t idx)
-{
-    switch (duk_get_type(ctx, idx)) {
-    case DUK_TYPE_OBJECT:
-        if (duk_is_function(ctx, idx) || duk_is_php_object(ctx, idx)) {
-            // We should not release it
-            return 0;
-        }
-        break;
-    }
-
-    return 1; /* we should free it */
-}
-
-
 void duk_to_zval(zval ** var, duk_context * ctx, duk_idx_t idx)
 {
     duk_size_t len;
